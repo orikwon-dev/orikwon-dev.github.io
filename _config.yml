@@ -1,0 +1,61 @@
+# Site Settings
+title: "오리의 노트"
+description: "개인 개발 일지와 기술적인 경험을 기록하는 공간입니다."
+url: "https://orikwon-dev.github.io"
+baseurl: "" # 사이트가 루트가 아닌 서브디렉토리인 경우 경로 입력
+
+# Theme Settings
+theme: minimal-mistakes-jekyll
+minimal_mistakes_skin: "default" # "air", "aqua", "contrast", "dark", "dirt", "neon", "mint", "sunrise" 등 선택 가능
+
+# Locale
+locale: "ko-KR"
+
+# Site Author
+author:
+  name: "OriKwon"
+  bio: "Game Developer"
+  location: "Seoul, Korea"
+  links:
+    - label: "GitHub"
+      icon: "fab fa-fw fa-github"
+      url: "https://github.com/orikwon-dev"
+
+# Plugins
+plugins:
+  - jekyll-paginate
+  - jekyll-sitemap
+  - jekyll-gist
+  - jekyll-feed
+  - jekyll-include-cache
+
+# Pagination
+paginate: 5
+paginate_path: /page:num/
+
+# Markdown Provider
+markdown: kramdown
+highlighter: rouge
+
+# Collections
+collections:
+  posts:
+    output: true
+    permalink: /:categories/:title/
+  pages:
+    output: true
+    permalink: /:basename/
+
+# Defaults
+defaults:
+  # _posts
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: single
+      author_profile: true
+      read_time: true
+      comments: true
+      share: true
+      related: true
