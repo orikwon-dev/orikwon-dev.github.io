@@ -5,7 +5,7 @@ url: "https://orikwon-dev.github.io"
 baseurl: "" # 사이트가 루트가 아닌 서브디렉토리인 경우 경로 입력
 
 # Theme Settings
-theme: minimal-mistakes-jekyll
+remote_theme: "mmistakes/minimal-mistakes"
 minimal_mistakes_skin: "default" # "air", "aqua", "contrast", "dark", "dirt", "neon", "mint", "sunrise" 등 선택 가능
 
 # Locale
@@ -23,6 +23,7 @@ author:
 
 # Plugins
 plugins:
+  - jekyll-remote-theme
   - jekyll-paginate
   - jekyll-sitemap
   - jekyll-gist
