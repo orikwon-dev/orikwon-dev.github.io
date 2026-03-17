@@ -3,6 +3,7 @@ title: "오리의 노트"
 description: "개인 개발 일지와 기술적인 경험을 기록하는 공간입니다."
 url: "https://orikwon-dev.github.io"
 baseurl: "" # 사이트가 루트가 아닌 서브디렉토리인 경우 경로 입력
+future: true # 미래 날짜의 글도 미리 보여줍니다.
 
 # Theme Settings
 remote_theme: "mmistakes/minimal-mistakes"
