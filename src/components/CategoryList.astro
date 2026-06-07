@@ -1,0 +1,149 @@
+---
+import { getCollection } from 'astro:content';
+
+interface Props {
+  category: string;
+}
+
+const { category } = Astro.props;
+
+// 1. 모든 문서 로드
+const docs = await getCollection('docs');
+
+// 2. 카테고리명 정규화 (예: "Client Architecture" -> "client-architecture")
+const targetSlug = category.toLowerCase().replace(/\s+/g, '-');
+
+// 3. 필터링: 해당 카테고리 하위에 속하며 index 페이지가 아닌 문서들
+const filteredDocs = docs.filter(doc => {
+  const parts = doc.id.split('/');
+  const docCategorySlug = parts[0].toLowerCase();
+  
+  // 카테고리 디렉토리가 매칭되는지 확인
+  const isMatch = docCategorySlug === targetSlug;
+  
+  // 인덱스 페이지(카테고리 홈) 제외: ID에 슬래시가 없는 카테고리 루트 파일이거나 파일명이 index인 경우
+  const isIndex = !doc.id.includes('/') || parts[parts.length - 1].replace(/\.mdx?$/, '') === 'index';
+  
+  return isMatch && !isIndex;
+});
+
+// 4. 정렬
+// Frontmatter의 date가 있다면 우선적으로 최신 날짜 역순 정렬
+// date가 없으면 title 사전순 정렬
+filteredDocs.sort((a, b) => {
+  const dateA = (a.data as any).date ? new Date((a.data as any).date).getTime() : 0;
+  const dateB = (b.data as any).date ? new Date((b.data as any).date).getTime() : 0;
+  
+  if (dateA && dateB) {
+    return dateB - dateA; // 최신 순 (최신 날짜가 위로)
+  } else if (dateA) {
+    return -1; // date가 있는 쪽이 위로
+  } else if (dateB) {
+    return 1;
+  }
+  
+  // 둘 다 date가 없으면 제목 기준 정렬
+  return a.data.title.localeCompare(b.data.title);
+});
+
+// 5. Starlight 문서 URL 빌드 헬퍼
+function getDocUrl(docId: string) {
+  let cleanId = docId.replace(/\.mdx?$/, '');
+  if (cleanId === 'index') {
+    cleanId = '';
+  } else if (cleanId.endsWith('/index')) {
+    cleanId = cleanId.slice(0, -6);
+  }
+  return `/${cleanId.toLowerCase()}`;
+}
+
+// 6. 날짜 포맷 헬퍼
+function formatDate(dateVal: any) {
+  if (!dateVal) return '';
+  const d = new Date(dateVal);
+  if (isNaN(d.getTime())) return '';
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+---
+
+<div class="category-posts-container">
+  {filteredDocs.length === 0 ? (
+    <p class="no-posts">아직 등록된 포스팅이 없습니다.</p>
+  ) : (
+    <div class="posts-list">
+      {filteredDocs.map(doc => {
+        return (
+          <a href={getDocUrl(doc.id)} class="post-card">
+            <span class="post-title">{doc.data.title}</span>
+            {doc.data.description && <p class="post-desc">{doc.data.description}</p>}
+            
+            {doc.data.tags && doc.data.tags.length > 0 && (
+              <div class="post-tags">
+                {doc.data.tags.map((tag: string) => (
+                  <span class="post-tag">#{tag}</span>
+                ))}
+              </div>
+            )}
+          </a>
+        );
+      })}
+    </div>
+  )}
+</div>
+
+<style>
+  .category-posts-container {
+    margin-top: 1rem;
+  }
+  .no-posts {
+    color: var(--sl-color-gray-3);
+    font-size: 1.1rem;
+    padding: 2rem 0;
+  }
+  .posts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+  .post-card {
+    display: flex;
+    flex-direction: column;
+    padding: 1.25rem 1.5rem;
+    background-color: var(--sl-color-bg-nav);
+    border: 1px solid var(--sl-color-hairline);
+    border-radius: 0.6rem;
+    text-decoration: none;
+    color: var(--sl-color-text);
+    transition: border-color 0.2s, background-color 0.2s, transform 0.15s;
+  }
+  .post-card:hover {
+    border-color: var(--sl-color-text-accent);
+    background-color: var(--sl-color-bg-inline-code);
+    transform: translateY(-2px);
+  }
+  .post-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--sl-color-text-accent);
+  }
+  .post-desc {
+    margin-top: 0.5rem;
+    font-size: 0.95rem;
+    color: var(--sl-color-gray-2);
+    line-height: 1.5;
+  }
+  .post-tags {
+    margin-top: 0.75rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .post-tag {
+    font-size: 0.8rem;
+    color: var(--sl-color-gray-3);
+    background-color: var(--sl-color-bg);
+    padding: 0.15rem 0.4rem;
+    border-radius: 0.25rem;
+    border: 1px solid var(--sl-color-hairline);
+  }
+</style>
